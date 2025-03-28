@@ -1,0 +1,76 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "fireup/fireup",
+    "description": "A modern, lightweight PHP framework designed for simplicity and ease of use",
+    "type": "project",
+    "license": "MIT",
+    "homepage": "https://fire-updev.vercel.app",
+    "support": {
+        "issues": "https://github.com/kingjethro999/FireUp/issues",
+        "source": "https://github.com/kingjethro999/FireUp",
+        "docs": "https://fire-updev.vercel.app"
+    },
+    "authors": [
+        {
+            "name": "FireUp Team",
+            "email": "jethrojerrybj@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "monolog/monolog": "^3.0",
+        "vlucas/phpdotenv": "^5.5",
+        "cboden/ratchet": "^0.4.4",
+        "react/event-loop": "^1.3",
+        "illuminate/support": "^10.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0",
+        "squizlabs/php_codesniffer": "^3.6",
+        "phpstan/phpstan": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FireUp\\": "src/FireUp/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FireUp\\Tests\\": "tests/"
+        }
+    },
+    "bin": [
+        "fireup"
+    ],
+    "scripts": {
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "test": "phpunit",
+        "check": [
+            "@test",
+            "@cs-check",
+            "@phpstan"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "phpstan": "phpstan analyse"
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+} 

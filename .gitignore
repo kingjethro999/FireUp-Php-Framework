@@ -1,0 +1,19 @@
+/vendor/
+/node_modules/
+/Go Live/
+.env
+.env.backup
+.phpunit.result.cache
+composer.lock
+npm-debug.log
+yarn-error.log
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+/storage/*.key
+/storage/logs/*
+!storage/logs/.gitkeep
+/config/*.cache.php 

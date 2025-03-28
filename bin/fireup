@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+define('FIREUP_START', microtime(true));
+
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+*/
+
+require __DIR__.'/../vendor/autoload.php';
+
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+*/
+
+$app = new FireUp\Application();
+$console = new FireUp\Console\Console($app);
+$status = $console->run($argv);
+
+exit($status); 
