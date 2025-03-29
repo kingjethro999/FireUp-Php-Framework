@@ -3,7 +3,6 @@
 namespace FireUp\Console\Commands;
 
 use FireUp\Application;
-use FireUp\Routing\Router;
 
 class RouteListCommand extends Command
 {
@@ -17,18 +16,17 @@ class RouteListCommand extends Command
     {
         if (in_array('--help', $args)) {
             $this->showHelp();
-            return 0;
+            return;
         }
 
         $this->info('Registered Routes:');
-        $this->comment('==================');
+        $this->info('==================');
 
-        $router = $this->app->getRouter();
-        $routes = $router->getRoutes();
-
+        $routes = $this->app->getRouter()->getRoutes();
+        
         if (empty($routes)) {
-            $this->info('No routes registered.');
-            return 0;
+            $this->comment('No routes registered.');
+            return;
         }
 
         foreach ($routes as $route) {
@@ -36,11 +34,9 @@ class RouteListCommand extends Command
                 '%s %s -> %s',
                 str_pad($route['method'], 7),
                 str_pad($route['uri'], 30),
-                $route['handler']
+                $route['action']
             ));
         }
-
-        return 0;
     }
 
     /**
@@ -70,9 +66,9 @@ class RouteListCommand extends Command
      */
     protected function showHelp()
     {
-        echo "Usage: fireup route:list [options]\n\n";
+        echo "Usage: fireup route:list\n\n";
         echo "Options:\n";
-        echo "  --help  Show this help message\n\n";
+        echo "  --help           Show this help message\n\n";
         echo "Example:\n";
         echo "  fireup route:list\n";
     }

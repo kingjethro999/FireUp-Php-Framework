@@ -22,22 +22,10 @@ class RollbackCommand extends Command
 
         $this->info('Rolling back migrations...');
 
-        $migrationsPath = $this->app->getBasePath() . '/database/migrations';
-        if (!file_exists($migrationsPath)) {
-            $this->error('No migrations found.');
-            return 1;
-        }
-
-        $migrations = glob($migrationsPath . '/*.php');
-        if (empty($migrations)) {
-            $this->info('No migrations found.');
-            return 0;
-        }
-
         $migration = new Migration($this->app);
         $migration->rollback();
 
-        $this->info('Rollback completed successfully.');
+        $this->info('Migrations rolled back successfully!');
         return 0;
     }
 
@@ -58,7 +46,7 @@ class RollbackCommand extends Command
      */
     public function getDescription()
     {
-        return 'Rollback the last migration';
+        return 'Rollback the last database migration';
     }
 
     /**
@@ -68,9 +56,9 @@ class RollbackCommand extends Command
      */
     protected function showHelp()
     {
-        echo "Usage: fireup rollback [options]\n\n";
+        echo "Usage: fireup rollback\n\n";
         echo "Options:\n";
-        echo "  --help  Show this help message\n\n";
+        echo "  --help           Show this help message\n\n";
         echo "Example:\n";
         echo "  fireup rollback\n";
     }

@@ -31,12 +31,11 @@ class Console
     /**
      * Create a new console instance.
      *
-     * @param  Application  $app
      * @return void
      */
-    public function __construct(Application $app)
+    public function __construct()
     {
-        $this->app = $app;
+        $this->app = new \FireUp\Application();
         $this->registerCommands();
     }
 
@@ -47,47 +46,48 @@ class Console
      */
     protected function registerCommands()
     {
+        // Register built-in commands
         $this->commands = [
-            'serve' => ServeCommand::class,
-            'create:model' => CreateModelCommand::class,
-            'create:controller' => CreateControllerCommand::class,
-            'create:view' => CreateViewCommand::class,
-            'golive' => GoLiveCommand::class,
-            'migrate' => MigrateCommand::class,
-            'rollback' => RollbackCommand::class,
-            'route:list' => RouteListCommand::class,
+            'serve' => new Commands\ServeCommand($this->app),
+            'create:model' => new Commands\CreateModelCommand($this->app),
+            'create:controller' => new Commands\CreateControllerCommand($this->app),
+            'create:view' => new Commands\CreateViewCommand($this->app),
+            'golive' => new Commands\GoLiveCommand($this->app),
+            'migrate' => new Commands\MigrateCommand($this->app),
+            'rollback' => new Commands\RollbackCommand($this->app),
+            'route:list' => new Commands\RouteListCommand($this->app),
         ];
     }
 
     /**
      * Run the console application.
      *
-     * @param  array  $argv
-     * @return int
+     * @return void
      */
-    public function run(array $argv)
+    public function run()
     {
-        // Remove the script name from arguments
-        array_shift($argv);
+        $args = $_SERVER['argv'];
+        array_shift($args); // Remove the script name
 
-        // Get the command name
-        $command = array_shift($argv);
-
-        if (!$command) {
+        if (empty($args)) {
             $this->showHelp();
-            return 0;
+            return;
         }
 
-        // Check if command exists
+        $command = array_shift($args);
+
+        if ($command === '--help' || $command === '-h') {
+            $this->showHelp();
+            return;
+        }
+
         if (!isset($this->commands[$command])) {
-            $this->error("Command '{$command}' not found.");
-            return 1;
+            echo "Command not found: {$command}\n";
+            $this->showHelp();
+            return;
         }
 
-        // Create and run the command
-        $commandClass = $this->commands[$command];
-        $commandInstance = new $commandClass($this->app);
-        return $commandInstance->handle($argv);
+        $this->commands[$command]->handle($args);
     }
 
     /**
@@ -97,18 +97,13 @@ class Console
      */
     protected function showHelp()
     {
-        echo "FireUp Framework CLI\n\n";
+        echo "FireUp Console\n\n";
         echo "Available commands:\n";
-        echo "  serve              Start the FireUp development server\n";
-        echo "  create:model       Create a new model\n";
-        echo "  create:controller  Create a new controller\n";
-        echo "  create:view        Create a new view\n";
-        echo "  golive             Prepare project for hosting\n";
-        echo "  migrate            Run database migrations\n";
-        echo "  rollback           Rollback the last migration\n";
-        echo "  route:list         List all registered routes\n\n";
-        echo "For more information about a command, run:\n";
-        echo "  fireup <command> --help\n";
+        foreach ($this->commands as $name => $command) {
+            echo "  {$name}\t{$command->getDescription()}\n";
+        }
+        echo "\nFor more information about a command, run:\n";
+        echo "  fireup {$name} --help\n";
     }
 
     /**

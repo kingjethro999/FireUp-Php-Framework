@@ -89,4 +89,12 @@ abstract class Command
      * @return string
      */
     abstract public function getDescription();
+
+    protected function showHelp()
+    {
+        echo "Usage: fireup {$this->getSignature()}\n\n";
+        echo "{$this->getDescription()}\n\n";
+        echo "Options:\n";
+        echo "  --help  Show this help message\n";
+    }
 } 

@@ -3,24 +3,9 @@
 namespace FireUp\Console\Commands;
 
 use FireUp\Application;
-use FireUp\Http\Server\Server;
 
 class ServeCommand extends Command
 {
-    /**
-     * The default host.
-     *
-     * @var string
-     */
-    protected $host = 'localhost';
-
-    /**
-     * The default port.
-     *
-     * @var int
-     */
-    protected $port = 8000;
-
     /**
      * Handle the command.
      *
@@ -29,25 +14,25 @@ class ServeCommand extends Command
      */
     public function handle(array $args)
     {
-        // Parse command arguments
-        foreach ($args as $arg) {
-            if (strpos($arg, '--host=') === 0) {
-                $this->host = substr($arg, 7);
-            } elseif (strpos($arg, '--port=') === 0) {
-                $this->port = (int) substr($arg, 7);
-            } elseif ($arg === '--help') {
-                $this->showHelp();
-                return 0;
-            }
+        if (in_array('--help', $args)) {
+            $this->showHelp();
+            return;
         }
 
-        $this->info("Starting FireUp development server...");
-        $this->info("Server running at http://{$this->host}:{$this->port}");
-        $this->info("Press Ctrl+C to stop the server.");
+        $host = $args[0] ?? 'localhost';
+        $port = $args[1] ?? 8000;
 
-        // Create and start the server
-        $server = new Server($this->app, $this->host, $this->port);
-        return $server->start();
+        $this->info("Starting FireUp development server...");
+        $this->info("Server running at http://{$host}:{$port}");
+        
+        $command = sprintf(
+            'php -S %s:%d -t %s',
+            $host,
+            $port,
+            $this->app->getBasePath() . '/public'
+        );
+
+        passthru($command);
     }
 
     /**
@@ -57,7 +42,7 @@ class ServeCommand extends Command
      */
     public function getSignature()
     {
-        return 'serve';
+        return 'serve [host] [port]';
     }
 
     /**
@@ -67,7 +52,7 @@ class ServeCommand extends Command
      */
     public function getDescription()
     {
-        return 'Start the FireUp development server with web-based setup interface';
+        return 'Start the FireUp development server';
     }
 
     /**
@@ -77,13 +62,11 @@ class ServeCommand extends Command
      */
     protected function showHelp()
     {
-        echo "Usage: fireup serve [options]\n\n";
+        echo "Usage: fireup serve [host] [port]\n\n";
         echo "Options:\n";
-        echo "  --host=<host>    The host to bind the server to (default: localhost)\n";
-        echo "  --port=<port>    The port to bind the server to (default: 8000)\n";
         echo "  --help          Show this help message\n\n";
         echo "Example:\n";
         echo "  fireup serve\n";
-        echo "  fireup serve --host=0.0.0.0 --port=8080\n";
+        echo "  fireup serve 0.0.0.0 8080\n";
     }
 } 

@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+
+define('FIREUP_START', microtime(true));
+
+require __DIR__.'/vendor/autoload.php';
+
+use FireUp\Console\Console;
+
+$console = new Console();
+$console->run(); 

@@ -14,79 +14,53 @@ class CreateViewCommand extends Command
      */
     public function handle(array $args)
     {
-        if (empty($args[0])) {
-            $this->error('Please provide a view name.');
+        if (in_array('--help', $args)) {
             $this->showHelp();
-            return 1;
+            return;
         }
 
-        $viewName = $args[0];
-        $layout = $this->getLayout($args);
-        $force = in_array('--force', $args);
+        if (empty($args)) {
+            $this->error('Please specify a view name');
+            $this->showHelp();
+            return;
+        }
 
-        // Create the view file
+        $viewName = array_shift($args);
         $viewPath = $this->app->getBasePath() . '/resources/views/' . str_replace('.', '/', $viewName) . '.php';
-        $viewDir = dirname($viewPath);
 
-        if (!file_exists($viewDir)) {
-            mkdir($viewDir, 0755, true);
+        if (file_exists($viewPath)) {
+            $this->error("View {$viewName} already exists!");
+            return;
         }
 
-        if (file_exists($viewPath) && !$force) {
-            $this->error("View {$viewName} already exists. Use --force to overwrite.");
-            return 1;
+        // Create directory if it doesn't exist
+        $directory = dirname($viewPath);
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
         }
 
-        $content = $this->generateViewContent($viewName, $layout);
+        $content = $this->generateViewContent($viewName);
         file_put_contents($viewPath, $content);
+
         $this->info("View {$viewName} created successfully!");
-
-        return 0;
-    }
-
-    /**
-     * Get the layout from command arguments.
-     *
-     * @param  array  $args
-     * @return string
-     */
-    protected function getLayout(array $args)
-    {
-        foreach ($args as $arg) {
-            if (strpos($arg, '--layout=') === 0) {
-                return substr($arg, 9);
-            }
-        }
-
-        return 'layouts.app';
     }
 
     /**
      * Generate the view file content.
      *
      * @param  string  $viewName
-     * @param  string  $layout
      * @return string
      */
-    protected function generateViewContent($viewName, $layout)
+    protected function generateViewContent($viewName)
     {
         return <<<EOT
-@extends('{$layout}')
+@extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('{$viewName}') }}</div>
-
-                <div class="card-body">
-                    <!-- Add your content here -->
-                </div>
-            </div>
-        </div>
+    <div class="container">
+        <h1>{{ \$title ?? 'Welcome' }}</h1>
+        <p>This is your new view: {{ $viewName }}</p>
     </div>
-</div>
 @endsection
 EOT;
     }
@@ -98,7 +72,7 @@ EOT;
      */
     public function getSignature()
     {
-        return 'create:view';
+        return 'create:view <name>';
     }
 
     /**
@@ -118,13 +92,13 @@ EOT;
      */
     protected function showHelp()
     {
-        echo "Usage: fireup create:view <name> [options]\n\n";
+        echo "Usage: fireup create:view <name>\n\n";
+        echo "Arguments:\n";
+        echo "  name              The name of the view (can use dot notation for subdirectories)\n\n";
         echo "Options:\n";
-        echo "  --layout=<layout>  The layout to extend (default: layouts.app)\n";
-        echo "  --force           Overwrite the view if it exists\n";
         echo "  --help           Show this help message\n\n";
         echo "Example:\n";
         echo "  fireup create:view welcome\n";
-        echo "  fireup create:view auth.login --layout=auth\n";
+        echo "  fireup create:view users.index\n";
     }
 } 
