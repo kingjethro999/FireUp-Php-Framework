@@ -3,6 +3,7 @@
     "name": "fireup/fireup",
     "description": "A modern, lightweight PHP framework designed for simplicity and ease of use",
     "type": "project",
+    "version": "1.0.1",
     "license": "MIT",
     "homepage": "https://fire-updev.vercel.app",
     "support": {
