@@ -64,34 +64,26 @@
         <div class="bg-white rounded-lg shadow-sm p-6">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Recent Tables</h2>
             <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-900">users</h3>
-                        <p class="text-sm text-gray-500">Last modified: 2 hours ago</p>
+                <?php if (empty($recentTables)): ?>
+                    <p class="text-gray-500 text-sm">No tables created yet. Use the Table Builder to create your first table.</p>
+                <?php else: ?>
+                    <?php foreach ($recentTables as $table): ?>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900"><?= htmlspecialchars($table['name']) ?></h3>
+                            <p class="text-sm text-gray-500">Last modified: <?= $table['modified_at'] ?></p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <a href="/dashboard/table-builder?table=<?= urlencode($table['name']) ?>" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button onclick="deleteTable('<?= htmlspecialchars($table['name']) ?>')" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <button class="text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="text-red-600 hover:text-red-800">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-900">products</h3>
-                        <p class="text-sm text-gray-500">Last modified: 1 day ago</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="text-red-600 hover:text-red-800">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -99,35 +91,44 @@
         <div class="bg-white rounded-lg shadow-sm p-6">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Recent APIs</h2>
             <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-900">/api/users</h3>
-                        <p class="text-sm text-gray-500">GET, POST, PUT, DELETE</p>
+                <?php if (empty($recentApis)): ?>
+                    <p class="text-gray-500 text-sm">No APIs created yet. Use the API Generator to create your first API.</p>
+                <?php else: ?>
+                    <?php foreach ($recentApis as $api): ?>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900"><?= htmlspecialchars($api['endpoint']) ?></h3>
+                            <p class="text-sm text-gray-500"><?= implode(', ', $api['methods']) ?></p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <a href="/dashboard/api-generator?endpoint=<?= urlencode($api['endpoint']) ?>" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="/dashboard/api-tester?endpoint=<?= urlencode($api['endpoint']) ?>" class="text-green-600 hover:text-green-800">
+                                <i class="fas fa-vial"></i>
+                            </a>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <button class="text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="text-green-600 hover:text-green-800">
-                            <i class="fas fa-vial"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-900">/api/products</h3>
-                        <p class="text-sm text-gray-500">GET, POST, PUT, DELETE</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="text-green-600 hover:text-green-800">
-                            <i class="fas fa-vial"></i>
-                        </button>
-                    </div>
-                </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+<script>
+function deleteTable(tableName) {
+    if (confirm('Are you sure you want to delete this table?')) {
+        fetch(`/dashboard/table-builder/delete?table=${encodeURIComponent(tableName)}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    }
+}
+</script>
