@@ -65,29 +65,32 @@ class GoLiveCommand extends Command
             mkdir($goLiveDir, 0755, true);
         }
 
-        // Copy project files
-        $this->copyProjectFiles($goLiveDir);
+        // Copy and convert project files
+        $this->copyAndConvertFiles($goLiveDir);
 
         // Create .htaccess file
         $this->createHtaccess($goLiveDir);
+
+        // Create index.php
+        $this->createIndexFile($goLiveDir);
 
         // Show hosting recommendations
         $this->showHostingRecommendations();
 
         $this->info('Project ready for hosting!');
-        $this->info("Files have been copied to the 'Go Live' directory.");
+        $this->info("Files have been copied and converted in the 'Go Live' directory.");
         $this->info('You can now upload these files to your hosting provider.');
 
         return 0;
     }
 
     /**
-     * Copy project files to the Go Live directory.
+     * Copy and convert project files to the Go Live directory.
      *
      * @param  string  $goLiveDir
      * @return void
      */
-    protected function copyProjectFiles($goLiveDir)
+    protected function copyAndConvertFiles($goLiveDir)
     {
         $basePath = $this->app->getBasePath();
         $iterator = new RecursiveIteratorIterator(
@@ -95,25 +98,116 @@ class GoLiveCommand extends Command
         );
 
         foreach ($iterator as $file) {
-            // Skip directories and files that should be excluded
             if ($this->shouldExclude($file)) {
                 continue;
             }
 
-            // Get relative path
             $relativePath = substr($file->getPathname(), strlen($basePath) + 1);
             $targetPath = $goLiveDir . '/' . $relativePath;
 
-            // Create directory if it doesn't exist
             if ($file->isDir()) {
                 if (!file_exists($targetPath)) {
                     mkdir($targetPath, 0755, true);
                 }
             } else {
-                // Copy file
-                copy($file->getPathname(), $targetPath);
+                if ($file->getExtension() === 'php') {
+                    $this->convertPhpFile($file->getPathname(), $targetPath);
+                } else {
+                    copy($file->getPathname(), $targetPath);
+                }
             }
         }
+    }
+
+    /**
+     * Convert a PHP file to a raw PHP file.
+     *
+     * @param  string  $sourcePath
+     * @param  string  $targetPath
+     * @return void
+     */
+    protected function convertPhpFile($sourcePath, $targetPath)
+    {
+        $content = file_get_contents($sourcePath);
+        
+        // Convert namespace imports to require statements
+        $content = preg_replace_callback('/use\s+([^;]+);/', function($matches) {
+            $namespace = $matches[1];
+            $file = str_replace('\\', '/', $namespace) . '.php';
+            return "require_once __DIR__ . '/vendor/$file';";
+        }, $content);
+
+        // Convert class references to direct file includes
+        $content = preg_replace_callback('/new\s+([^\(]+)\(/', function($matches) {
+            $class = $matches[1];
+            if (strpos($class, '\\') !== false) {
+                $file = str_replace('\\', '/', $class) . '.php';
+                return "require_once __DIR__ . '/vendor/$file'; new $class(";
+            }
+            return "new $class(";
+        }, $content);
+
+        file_put_contents($targetPath, $content);
+    }
+
+    /**
+     * Create the .htaccess file for Apache.
+     *
+     * @param  string  $goLiveDir
+     * @return void
+     */
+    protected function createHtaccess($goLiveDir)
+    {
+        $htaccess = <<<'EOT'
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [L]
+
+# Security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-XSS-Protection "1; mode=block"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# PHP settings
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value max_input_time 300
+EOT;
+
+        file_put_contents($goLiveDir . '/public/.htaccess', $htaccess);
+    }
+
+    /**
+     * Create the index.php file.
+     *
+     * @param  string  $goLiveDir
+     * @return void
+     */
+    protected function createIndexFile($goLiveDir)
+    {
+        $indexContent = <<<'EOT'
+<?php
+define('FIREUP_START', microtime(true));
+
+// Load configuration
+require_once __DIR__ . '/config/app.php';
+
+// Initialize database connection
+require_once __DIR__ . '/database/connection.php';
+
+// Load routes
+require_once __DIR__ . '/routes/web.php';
+require_once __DIR__ . '/routes/api.php';
+
+// Initialize application
+$app = new FireUp\Application();
+$app->run();
+EOT;
+
+        file_put_contents($goLiveDir . '/public/index.php', $indexContent);
     }
 
     /**
@@ -135,24 +229,6 @@ class GoLiveCommand extends Command
 
         // Check if it's an excluded file
         return in_array($relativePath, $this->excludeFiles);
-    }
-
-    /**
-     * Create the .htaccess file for Apache.
-     *
-     * @param  string  $goLiveDir
-     * @return void
-     */
-    protected function createHtaccess($goLiveDir)
-    {
-        $htaccess = <<<'EOT'
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.php [L]
-EOT;
-
-        file_put_contents($goLiveDir . '/.htaccess', $htaccess);
     }
 
     /**
