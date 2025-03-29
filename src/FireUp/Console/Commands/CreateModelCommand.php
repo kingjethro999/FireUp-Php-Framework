@@ -16,13 +16,13 @@ class CreateModelCommand extends Command
     {
         if (in_array('--help', $args)) {
             $this->showHelp();
-            return;
+            return 0;
         }
 
         if (empty($args)) {
             $this->error('Please specify a model name');
             $this->showHelp();
-            return;
+            return 1;
         }
 
         $modelName = array_shift($args);
@@ -30,7 +30,7 @@ class CreateModelCommand extends Command
 
         if (file_exists($modelPath)) {
             $this->error("Model {$modelName} already exists!");
-            return;
+            return 1;
         }
 
         $content = $this->generateModelContent($modelName);

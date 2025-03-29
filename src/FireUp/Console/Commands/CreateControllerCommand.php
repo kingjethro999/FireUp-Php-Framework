@@ -16,13 +16,13 @@ class CreateControllerCommand extends Command
     {
         if (in_array('--help', $args)) {
             $this->showHelp();
-            return;
+            return 0;
         }
 
         if (empty($args)) {
             $this->error('Please specify a controller name');
             $this->showHelp();
-            return;
+            return 1;
         }
 
         $controllerName = array_shift($args);
@@ -30,14 +30,13 @@ class CreateControllerCommand extends Command
 
         if (file_exists($controllerPath)) {
             $this->error("Controller {$controllerName} already exists!");
-            return;
+            return 1;
         }
 
         $content = $this->generateControllerContent($controllerName);
         file_put_contents($controllerPath, $content);
 
         $this->info("Controller {$controllerName} created successfully!");
-
         return 0;
     }
 

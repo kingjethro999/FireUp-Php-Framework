@@ -16,13 +16,13 @@ class CreateViewCommand extends Command
     {
         if (in_array('--help', $args)) {
             $this->showHelp();
-            return;
+            return 0;
         }
 
         if (empty($args)) {
             $this->error('Please specify a view name');
             $this->showHelp();
-            return;
+            return 1;
         }
 
         $viewName = array_shift($args);
@@ -30,7 +30,7 @@ class CreateViewCommand extends Command
 
         if (file_exists($viewPath)) {
             $this->error("View {$viewName} already exists!");
-            return;
+            return 1;
         }
 
         // Create directory if it doesn't exist
@@ -43,6 +43,7 @@ class CreateViewCommand extends Command
         file_put_contents($viewPath, $content);
 
         $this->info("View {$viewName} created successfully!");
+        return 0;
     }
 
     /**

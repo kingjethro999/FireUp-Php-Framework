@@ -16,7 +16,7 @@ class RouteListCommand extends Command
     {
         if (in_array('--help', $args)) {
             $this->showHelp();
-            return;
+            return 0;
         }
 
         $this->info('Registered Routes:');
@@ -26,7 +26,7 @@ class RouteListCommand extends Command
         
         if (empty($routes)) {
             $this->comment('No routes registered.');
-            return;
+            return 0;
         }
 
         foreach ($routes as $route) {
@@ -37,6 +37,8 @@ class RouteListCommand extends Command
                 $route['action']
             ));
         }
+
+        return 0;
     }
 
     /**

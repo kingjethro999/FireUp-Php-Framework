@@ -16,7 +16,7 @@ class ServeCommand extends Command
     {
         if (in_array('--help', $args)) {
             $this->showHelp();
-            return;
+            return 0;
         }
 
         $host = $args[0] ?? 'localhost';
@@ -33,6 +33,7 @@ class ServeCommand extends Command
         );
 
         passthru($command);
+        return 0;
     }
 
     /**
