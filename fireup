@@ -6,6 +6,8 @@ define('FIREUP_START', microtime(true));
 require __DIR__.'/vendor/autoload.php';
 
 use FireUp\Console\Console;
+use FireUp\Application;
 
-$console = new Console();
-$console->run(); 
+$app = new Application();
+$console = new Console($app);
+$console->run($argv);

@@ -33,9 +33,9 @@ class Console
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Application $app)
     {
-        $this->app = new \FireUp\Application();
+        $this->app = $app;
         $this->registerCommands();
     }
 
@@ -62,32 +62,31 @@ class Console
     /**
      * Run the console application.
      *
-     * @return void
+     * @return int
      */
-    public function run()
+    public function run(array $argv)
     {
-        $args = $_SERVER['argv'];
-        array_shift($args); // Remove the script name
+        array_shift($argv); // Remove the script name
 
-        if (empty($args)) {
+        if (empty($argv)) {
             $this->showHelp();
-            return;
+            return 0;
         }
 
-        $command = array_shift($args);
+        $command = array_shift($argv);
 
         if ($command === '--help' || $command === '-h') {
             $this->showHelp();
-            return;
+            return 0;
         }
 
         if (!isset($this->commands[$command])) {
             echo "Command not found: {$command}\n";
             $this->showHelp();
-            return;
+            return 1;
         }
 
-        $this->commands[$command]->handle($args);
+        return $this->commands[$command]->handle($argv);
     }
 
     /**
