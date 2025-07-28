@@ -11,6 +11,7 @@ use FireUp\Console\Commands\GoLiveCommand;
 use FireUp\Console\Commands\MigrateCommand;
 use FireUp\Console\Commands\RollbackCommand;
 use FireUp\Console\Commands\RouteListCommand;
+use FireUp\Console\Commands\ApiMobileReadyCommand;
 
 class Console
 {
@@ -56,7 +57,18 @@ class Console
             'migrate' => new Commands\MigrateCommand($this->app),
             'rollback' => new Commands\RollbackCommand($this->app),
             'route:list' => new Commands\RouteListCommand($this->app),
+            'api:mobile-ready' => new Commands\ApiMobileReadyCommand($this->app),
+            'frontend' => new Commands\FrontendCommand($this->app),
+            'make:command' => new Commands\CreateCommandCommand($this->app),
+            'make:middleware' => new Commands\CreateMiddlewareCommand($this->app),
+            'make:policy' => new Commands\CreatePolicyCommand($this->app),
+            'make:seeder' => new Commands\CreateSeederCommand($this->app),
+            'make:factory' => new Commands\CreateFactoryCommand($this->app),
+            'make:event' => new Commands\CreateEventCommand($this->app),
         ];
+        // Add 'list' and 'help' as aliases
+        $this->commands['list'] = null; // Placeholder, handled in run()
+        $this->commands['help'] = null; // Placeholder, handled in run()
     }
 
     /**
@@ -80,7 +92,25 @@ class Console
             return 0;
         }
 
-        if (!isset($this->commands[$command])) {
+        // Handle 'list' command
+        if ($command === 'list') {
+            $this->showHelp();
+            return 0;
+        }
+
+        // Handle 'help <command>'
+        if ($command === 'help') {
+            $helpCommand = array_shift($argv);
+            if ($helpCommand && isset($this->commands[$helpCommand]) && $this->commands[$helpCommand]) {
+                $this->commands[$helpCommand]->showHelp();
+            } else {
+                echo "Unknown command: {$helpCommand}\n";
+                $this->showHelp();
+            }
+            return 0;
+        }
+
+        if (!isset($this->commands[$command]) || !$this->commands[$command]) {
             echo "Command not found: {$command}\n";
             $this->showHelp();
             return 1;
@@ -99,10 +129,12 @@ class Console
         echo "FireUp Console\n\n";
         echo "Available commands:\n";
         foreach ($this->commands as $name => $command) {
-            echo "  {$name}\t{$command->getDescription()}\n";
+            if ($command) {
+                echo "  {$name}\t{$command->getDescription()}\n";
+            }
         }
-        echo "\nFor more information about a command, run:\n";
-        echo "  fireup {$name} --help\n";
+        echo "\nUse 'fireup list' to see all commands.";
+        echo "\nUse 'fireup help <command>' for more info on a command.\n";
     }
 
     /**

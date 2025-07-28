@@ -1,36 +1,96 @@
 <?php
 
-if (!function_exists('env')) {
+if (!function_exists('csrf_token')) {
     /**
-     * Gets the value of an environment variable.
+     * Generate a CSRF token.
      *
-     * @param  string  $key
-     * @param  mixed  $default
+     * @return string
+     */
+    function csrf_token()
+    {
+        if (!isset($_SESSION['_token'])) {
+            $_SESSION['_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['_token'];
+    }
+}
+
+if (!function_exists('asset')) {
+    /**
+     * Generate an asset URL.
+     *
+     * @param string $path
+     * @return string
+     */
+    function asset($path)
+    {
+        return '/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('url')) {
+    /**
+     * Generate a URL.
+     *
+     * @param string $path
+     * @return string
+     */
+    function url($path = '')
+    {
+        $base = $_ENV['APP_URL'] ?? 'http://localhost';
+        return rtrim($base, '/') . '/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('redirect')) {
+    /**
+     * Redirect to a URL.
+     *
+     * @param string $url
+     * @return void
+     */
+    function redirect($url)
+    {
+        header('Location: ' . $url);
+        exit;
+    }
+}
+
+if (!function_exists('old')) {
+    /**
+     * Get old input value.
+     *
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
-    function env($key, $default = null)
+    function old($key, $default = '')
     {
-        $value = getenv($key);
+        return $_SESSION['old'][$key] ?? $default;
+    }
+}
 
-        if ($value === false) {
-            return $default;
+if (!function_exists('config')) {
+    /**
+     * Get configuration value.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    function config($key, $default = null)
+    {
+        $keys = explode('.', $key);
+        $config = require __DIR__ . '/../../config/' . $keys[0] . '.php';
+        
+        unset($keys[0]);
+        foreach ($keys as $segment) {
+            if (!isset($config[$segment])) {
+                return $default;
+            }
+            $config = $config[$segment];
         }
-
-        switch (strtolower($value)) {
-            case 'true':
-            case '(true)':
-                return true;
-            case 'false':
-            case '(false)':
-                return false;
-            case 'null':
-            case '(null)':
-                return null;
-            case 'empty':
-            case '(empty)':
-                return '';
-        }
-
-        return $value;
+        
+        return $config;
     }
 } 
