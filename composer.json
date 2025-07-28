@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "fireup/fireup",
-    "description": "A modern, lightweight PHP framework designed for simplicity and ease of use",
-    "type": "project",
-    "version": "1.0.1",
+    "description": "A modern, lightweight PHP framework designed for simplicity and ease of use. Now with advanced CLI generators and rich OpenAPI docs.",
+    "type": "library",
+    "version": "1.1.0",
     "license": "MIT",
     "homepage": "https://fire-updev.vercel.app",
     "support": {

@@ -1,4 +1,5 @@
 <?php
+use Dotenv\Dotenv;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,29 @@ $dotenv->load();
 $app = new FireUp\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
+
+// Add API docs serving
+if ($_SERVER['REQUEST_URI'] === '/api/docs') {
+    header('Content-Type: text/html');
+    echo '<!DOCTYPE html><html><head><title>FireUp API Docs</title></head><body>';
+    echo '<h1>FireUp API Documentation</h1>';
+    echo '<div id="swagger-ui"></div>';
+    echo '<script src="https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js"></script>';
+    echo '<script>const ui = SwaggerUIBundle({url: "/api-docs.json", dom_id: "#swagger-ui"});</script>';
+    echo '</body></html>';
+    exit;
+}
+if ($_SERVER['REQUEST_URI'] === '/api-docs.json') {
+    $jsonFile = __DIR__ . '/api-docs.json';
+    if (file_exists($jsonFile)) {
+        header('Content-Type: application/json');
+        readfile($jsonFile);
+    } else {
+        http_response_code(404);
+        echo json_encode(['error' => 'API docs not found. Run fireup route:list --docs to generate.']);
+    }
+    exit;
+}
 
 /*
 |--------------------------------------------------------------------------

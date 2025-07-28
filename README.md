@@ -84,7 +84,7 @@ Unlike WordPress's rigid theme system or Laravel's lack of theming:
 ## 🚀 Features
 
 - **Simple & Lightweight MVC Structure**
-- **Instant API Mode**
+- **Instant API Mode** - Auto-generate RESTful APIs
 - **Ultra-Simple Database Handling**
 - **Plugin System**
 - **Performance Optimizations**
@@ -92,8 +92,11 @@ Unlike WordPress's rigid theme system or Laravel's lack of theming:
 - **No-Setup File Storage**
 - **AI-Powered Code Suggestions**
 - **Native AJAX & WebSockets Support**
-- **Simple CLI Tools**
+- **Simple CLI Tools** - Like Laravel Artisan
 - **Flexible Theming System**
+- **JavaScript Integration** - Modern frontend tooling with Vite
+- **Mobile-Ready APIs** - Auto-generate endpoints for React Native apps
+- **Advanced CLI Generators** - Scaffold components with `make:` commands
 
 ## 📋 Requirements
 
@@ -250,6 +253,31 @@ fireup view:cache       # Cache views
 fireup view:clear       # Clear view cache
 ```
 
+### Frontend Commands
+```bash
+fireup frontend init    # Initialize frontend setup
+fireup frontend install # Install frontend dependencies
+fireup frontend dev     # Start Vite dev server
+fireup frontend build   # Build for production
+fireup frontend watch   # Watch for changes
+```
+
+### Advanced Generators
+```bash
+fireup make:command     # Create a new custom command
+fireup make:middleware  # Create a new middleware
+fireup make:policy      # Create a new policy
+fireup make:seeder      # Create a new database seeder
+fireup make:factory     # Create a new model factory
+fireup make:event       # Create a new event class
+```
+
+### API Commands
+```bash
+fireup api:mobile-ready # Prepare API for mobile apps
+fireup route:list --docs # Generate OpenAPI documentation
+```
+
 ## 📚 Documentation
 
 For detailed documentation, visit our [documentation website](https://fire-updev.vercel.app).
@@ -274,6 +302,53 @@ fireup create:view auth.login --layout=auth
 ### Server Options
 ```bash
 fireup serve --host=0.0.0.0 --port=8080
+```
+
+## 📖 Advanced API Documentation
+
+FireUp now generates rich OpenAPI docs for your API:
+- Path/query parameters are auto-detected (e.g., /api/v1/users/{id})
+- Request/response schemas are included for each endpoint
+- Endpoints requiring authentication are marked with Bearer token security
+- Docs are available at http://localhost:8000/api/docs after running `fireup api:mobile-ready` or `fireup route:list --docs`
+
+## 🚀 JavaScript Integration
+
+FireUp includes modern JavaScript tooling powered by Vite:
+
+### Features
+- **Hot Module Replacement** - Instant updates during development
+- **ES6+ Support** - Use modern JavaScript features
+- **Tailwind CSS** - Utility-first CSS framework
+- **Axios Integration** - Built-in HTTP client for API calls
+- **Event System** - Custom event handling
+- **Utility Functions** - Notifications, formatting, debouncing
+
+### Quick Start
+```bash
+# Initialize frontend setup
+fireup frontend init
+
+# Install dependencies
+fireup frontend install
+
+# Start development
+fireup frontend dev
+```
+
+### Global FireUp Object
+```javascript
+// API calls
+FireUp.api.get('/api/users')
+  .then(response => console.log(response.data));
+
+// Notifications
+FireUp.utils.notify('Success!', 'success');
+
+// Events
+FireUp.events.on('user-logged-in', (user) => {
+  console.log('User logged in:', user);
+});
 ```
 
 ## 🏗 Project Structure
